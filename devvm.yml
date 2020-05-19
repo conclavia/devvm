@@ -99,13 +99,22 @@
         creates: /usr/local/bin/aws
         warn: no
 
+    - name: Install AWS CloudFormation tooling
+      become: yes
+      become_user: "{{ username }}"
+      pip:
+        name:
+          - cfn-flip
+          - cfn-lint
+        state: latest
+        extra_args: --user
+
     # chromium
     - name: Install chromium
       snap:
         name: chromium
 
     # docker
-    
     - name: Install docker apt key
       apt_key:
         url: https://download.docker.com/linux/debian/gpg
@@ -130,15 +139,21 @@
         append: yes
     
     - name: Install docker python package
+      become: yes
+      become_user: "{{ username }}"
       pip:
         name: docker
         state: latest
+        extra_args: --user
 
     # docker-compose
     - name: Install docker compose
+      become: yes
+      become_user: "{{ username }}"
       pip:
         name: docker-compose
         state: latest
+        extra_args: --user
 
     # dotnet core
     - name: Install microsoft apt key
@@ -208,9 +223,24 @@
     - name: Install pipenv
       become: yes
       become_user: "{{ username }}"
-      shell: python3 -m pip install --user pipenv
+      pip:
+        name: pipenv
+        state: latest
+        extra_args: --user
+
+    # saml2aws
+    - name: Install saml2aws
+      become: yes
+      become_user: "{{ username }}"
+      shell: |
+        CURRENT_VERSION=2.26.1
+        wget https://github.com/Versent/saml2aws/releases/download/v${CURRENT_VERSION}/saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz
+        tar -xzvf saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz -C ~/.local/bin
+        chmod u+x ~/.local/bin/saml2aws
+        rm -f saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz
       args:
-        creates: "/home/{{ username }}/.local/bin/pipenv"
+        creates: ~/.local/bin/saml2aws
+        warn: no
 
     # vscode
     - name: Install vscode
