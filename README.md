@@ -3,7 +3,8 @@
 Example scripts for setting up a development VM using Ansible.
 
 Includes:
-* AWS CLI (v2)
+* Various Linux command-line utilities
+* AWS CLI (v2) + tooling (cfn-flip, cfn-lint, saml2aws)
 * Chromium web browser
 * Docker
 * Docker Compose
