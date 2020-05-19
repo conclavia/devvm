@@ -41,6 +41,7 @@
           - git-gui
           - gnupg2
           - jq
+          - neovim
           - netcat
           - net-tools
           - python3-pip
