@@ -1,0 +1,256 @@
+- name: Base Linux configuration
+  hosts: 127.0.0.1
+  connection: local
+  become: yes
+  vars:
+    username: "{{ lookup('env','USERNAME') }}"
+
+  tasks:
+    # cpu architecture
+    - name: Get CPU architecture
+      shell: dpkg --print-architecture
+      register: dpkg_architecture_command
+      changed_when: false
+    
+    - name: Store CPU architecture
+      set_fact:
+        dpkg_architecture: "{{ dpkg_architecture_command.stdout }}"
+
+    # os version
+    - name: Get OS version
+      shell: lsb_release -cs
+      register: lsb_release_command
+      changed_when: false
+    
+    - name: Store OS version
+      set_fact:
+        lsb_release: "{{ lsb_release_command.stdout }}"
+
+    # base packages
+    - name: Install base packages
+      apt:
+        name:
+          - apt-transport-https
+          - bat
+          - build-essential
+          - ca-certificates
+          - cmake
+          - curl
+          - fzf
+          - git
+          - git-gui
+          - gnupg2
+          - jq
+          - netcat
+          - net-tools
+          - python3-pip
+          # TODO: Reenable when installation bug is fixed
+          #   See https://bugs.launchpad.net/ubuntu/+source/rust-bat/+bug/1868517
+          # - ripgrep
+          - software-properties-common
+          - tree
+        state: latest
+        force: yes
+
+    # os config
+    - name: Set timezone
+      timezone:
+        name: Australia/Sydney
+    
+    - name: Allow 'sudo' group to have passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^%sudo"
+        line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        validate: visudo -cf %s
+    
+    - name: Disable screen lock
+      become: yes
+      become_user: "{{ username }}"
+      shell: "gsettings set org.gnome.desktop.screensaver lock-enabled false"
+    
+    - name: Disable screensaver
+      become: yes
+      become_user: "{{ username }}"
+      shell: "gsettings set org.gnome.desktop.session idle-delay 0"
+
+    - name: Add user base binary directories to path
+      become: yes
+      become_user: "{{ username }}"
+      copy:
+        src: home/.profile
+        dest: "~/.profile"
+
+    - name: Disable wayland
+      lineinfile:
+        path: /etc/gdm3/custom.conf
+        regexp: "^#?WaylandEnable="
+        line: "WaylandEnable=false"
+
+    # aws cli
+    - name: Install aws cli
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        ./aws/install
+        rm -rf aws awscliv2.zip
+      args:
+        creates: /usr/local/bin/aws
+        warn: no
+
+    # chromium
+    - name: Install chromium
+      snap:
+        name: chromium
+
+    # docker
+    
+    - name: Install docker apt key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+    
+    - name: Add docker apt repository
+      apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }}] https://download.docker.com/linux/ubuntu {{ lsb_release }} edge"
+        filename: docker
+        state: present
+    
+    - meta: flush_handlers
+    
+    - name: Install docker
+      apt:
+        name: "docker-ce:{{ dpkg_architecture }}"
+        state: latest
+
+    - name: Add user to the docker group
+      user:
+        name: "{{ username }}"
+        groups: docker
+        append: yes
+    
+    - name: Install docker python package
+      pip:
+        name: docker
+        state: latest
+
+    # docker-compose
+    - name: Install docker compose
+      pip:
+        name: docker-compose
+        state: latest
+
+    # dotnet core
+    - name: Install microsoft apt key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+    
+    - name: Add microsoft-ubuntu apt repository
+      apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }}] https://packages.microsoft.com/repos/microsoft-ubuntu-{{ lsb_release }}-prod {{ lsb_release }} main"
+        filename: dotnetdev
+        state: present
+      notify:
+        - Update apt cache
+    
+    - meta: flush_handlers
+    
+    - name: Install dotnet-sdk-3.1
+      apt:
+        name: dotnet-sdk-3.1
+        state: latest
+
+    # jetbrains
+    - name: Install Jetbrains Rider
+      snap:
+        name: rider
+        classic: yes
+
+    - name: Install Pycharm Professional
+      snap:
+        name: pycharm-professional
+        classic: yes
+
+    - name: Install IntelliJ Idea Ultimate
+      snap:
+        name: intellij-idea-ultimate
+        classic: yes
+
+    - name: Install DataGrip
+      snap:
+        name: datagrip
+        classic: yes
+
+    # nodejs
+    - name: Install nvm
+      become: yes
+      become_user: "{{ username }}"
+      shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+      args:
+        creates: ~/.nvm/nvm.sh
+        warn: no
+
+    - name: Install node
+      become: yes
+      become_user: "{{ username }}"
+      shell: >
+        bash -c "source ~/.nvm/nvm.sh && nvm install --lts --latest-npm"
+      args:
+        creates: ~/.nvm/alias
+
+    # postman
+    - name: Install Postman
+      snap:
+        name: postman
+
+    # python
+    - name: Install pipenv
+      become: yes
+      become_user: "{{ username }}"
+      shell: python3 -m pip install --user pipenv
+      args:
+        creates: "/home/{{ username }}/.local/bin/pipenv"
+
+    # vscode
+    - name: Install vscode
+      snap:
+        name: code
+        classic: yes
+
+    # yarn
+    - name: Uninstall cmdtest
+      apt:
+        name: cmdtest
+        state: absent
+    
+    - name: Install yarn apt key
+      apt_key:
+        url: https://dl.yarnpkg.com/debian/pubkey.gpg
+    
+    - name: Add yarn apt repository
+      apt_repository:
+        repo: "deb https://dl.yarnpkg.com/debian/ stable main"
+        filename: yarn
+        state: present
+      notify:
+        - Update apt cache
+    
+    - meta: flush_handlers
+    
+    - name: Install yarn
+      apt:
+        name: yarn
+        state: latest
+        install_recommends: no
+
+    # cleanup
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
+
+  # handlers
+  handlers:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
