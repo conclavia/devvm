@@ -78,12 +78,12 @@
       become_user: "{{ username }}"
       shell: "gsettings set org.gnome.desktop.session idle-delay 0"
 
-    - name: Add user base binary directories to path
+    - name: Configure local profile
       become: yes
       become_user: "{{ username }}"
       copy:
-        src: home/.profile
-        dest: "~/.profile"
+        src: home/
+        dest: ~/
 
     - name: Disable wayland
       lineinfile:
@@ -110,6 +110,7 @@
           - awscli-local
           - cfn-flip
           - cfn-lint
+          - sceptre
         state: latest
         extra_args: --user
 
