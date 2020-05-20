@@ -50,6 +50,8 @@
           # - ripgrep
           - software-properties-common
           - tree
+          - unzip
+          - zip
         state: latest
         force: yes
 
@@ -100,11 +102,12 @@
         creates: /usr/local/bin/aws
         warn: no
 
-    - name: Install AWS CloudFormation tooling
+    - name: Install AWS tooling
       become: yes
       become_user: "{{ username }}"
       pip:
         name:
+          - awscli-local
           - cfn-flip
           - cfn-lint
         state: latest
