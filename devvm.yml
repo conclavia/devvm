@@ -30,12 +30,14 @@
     - name: Install base packages
       apt:
         name:
+          - apt-file
           - apt-transport-https
           - bat
           - build-essential
           - ca-certificates
           - cmake
           - curl
+          - fd-find
           - fzf
           - git
           - git-gui

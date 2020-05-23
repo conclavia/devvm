@@ -26,3 +26,6 @@ fi
 
 # set AWS defaults
 export AWS_DEFAULT_REGION=ap-southeast-2
+
+# Configure fzf
+export FZF_DEFAULT_COMMAND='fdfind --type f --hidden --follow --exclude .git'
