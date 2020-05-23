@@ -42,6 +42,7 @@
           - git
           - git-gui
           - gnupg2
+          - httpie
           - jq
           - neovim
           - netcat
@@ -53,6 +54,7 @@
           - software-properties-common
           - tree
           - unzip
+          - wget
           - zip
         state: latest
         force: yes
