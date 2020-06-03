@@ -1,0 +1,51 @@
+- name: GIS development software
+  hosts: 127.0.0.1
+  connection: local
+  become: yes
+  vars:
+    username: "{{ lookup('env','USERNAME') }}"
+
+  tasks:
+    # os version
+    - name: Get OS version
+      shell: lsb_release -cs
+      register: lsb_release_command
+      changed_when: false
+    
+    - name: Store OS version
+      set_fact:
+        lsb_release: "{{ lsb_release_command.stdout }}"
+
+    # qgis
+    - name: Install qgis apt key
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 51F523511C7028C3
+    
+    - name: Add qgis apt repository
+      apt_repository:
+        repo: "deb https://qgis.org/ubuntu {{ lsb_release }} main"
+        filename: qgis
+        state: present
+      notify:
+        - Update apt cache
+    
+    - meta: flush_handlers
+    
+    - name: Install qgis
+      apt:
+        name:
+          - qgis
+          - qgis-plugin-grass
+        state: latest
+
+    # cleanup
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
+
+  # handlers
+  handlers:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
