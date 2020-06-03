@@ -146,6 +146,8 @@
         repo: "deb [arch={{ dpkg_architecture }}] https://download.docker.com/linux/ubuntu {{ lsb_release }} edge"
         filename: docker
         state: present
+      notify:
+        - Update apt cache
     
     - meta: flush_handlers
     
