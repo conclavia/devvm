@@ -1,5 +1,8 @@
 alias cat='batcat'
 alias fd='fdfind'
+alias gc='git commit -m'
+alias gd="git diff -- ':!package-lock.json' ':!yarn.lock'"
+alias upgrade='sudo apt update && sudo apt -y upgrade'
 
 # fzh - fuzzy search history
 # See https://github.com/junegunn/fzf/wiki/examples#command-history
