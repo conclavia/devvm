@@ -18,10 +18,10 @@ fi
 
 # set PATH so it includes user's private bin directories if they exist
 if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
+    PATH="$PATH:$HOME/bin"
 fi
 if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+    PATH="$PATH:$HOME/.local/bin"
 fi
 
 # set AWS defaults

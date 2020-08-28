@@ -1,7 +1,9 @@
+alias ans='ansible-playbook -K'
 alias cat='batcat'
 alias fd='fdfind'
 alias gc='git commit -m'
 alias gd="git diff -- ':!package-lock.json' ':!yarn.lock'"
+alias gr='git pull --rebase && git rebase origin/master'
 alias upgrade='sudo apt update && sudo apt -y upgrade'
 
 # fzh - fuzzy search history

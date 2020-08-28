@@ -128,6 +128,7 @@
       pip:
         name:
           - awscli-local
+          - awslogs
           - cfn-flip
           - cfn-lint
           - sceptre
@@ -202,6 +203,37 @@
         name: dotnet-sdk-3.1
         state: latest
 
+    # gh (GitHub cli)
+    - name: Check latest gh version
+      shell: curl -s https://api.github.com/repos/cli/cli/releases/latest | jq -r .html_url
+      register: gh_latest_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Check current gh version
+      shell: gh --version | grep /tag/ || true
+      register: gh_current_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Install gh
+      when: gh_latest_version.stdout != gh_current_version.stdout
+      shell: |
+        DOWNLOAD_URL=$( \
+          curl -s https://api.github.com/repos/cli/cli/releases/latest \
+          | jq -r '.assets[].browser_download_url' \
+          | grep "gh_.*_linux_amd64\\.deb" \
+        )
+        FILE_NAME=$(basename ${DOWNLOAD_URL})
+
+        curl -O -L ${DOWNLOAD_URL}
+        apt install ./${FILE_NAME}
+        rm -rf ${FILE_NAME}
+      args:
+        warn: no
+
     # jetbrains
     - name: Install Jetbrains Rider
       snap:
@@ -256,17 +288,40 @@
         extra_args: --user
 
     # saml2aws
+    - name: Check latest saml2aws version
+      shell: curl -s https://api.github.com/repos/Versent/saml2aws/releases/latest | jq -r .tag_name | sed s/^v//
+      register: saml2aws_latest_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Check current saml2aws version
+      become: yes
+      become_user: "{{ username }}"
+      shell: saml2aws --version 2>&1 || true
+      register: saml2aws_current_version
+      args:
+        warn: no
+      changed_when: false
+
     - name: Install saml2aws
+      when: saml2aws_latest_version.stdout != saml2aws_current_version.stdout
       become: yes
       become_user: "{{ username }}"
       shell: |
-        CURRENT_VERSION=2.26.1
-        wget https://github.com/Versent/saml2aws/releases/download/v${CURRENT_VERSION}/saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz
-        tar -xzvf saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz -C ~/.local/bin
+        DOWNLOAD_URL=$( \
+          curl -s https://api.github.com/repos/Versent/saml2aws/releases/latest \
+          | jq -r '.assets[].browser_download_url' \
+          | grep "saml2aws_.*_linux_amd64\\.tar\\.gz" \
+        )
+        FILE_NAME=$(basename ${DOWNLOAD_URL})
+
+        curl -O -L ${DOWNLOAD_URL}
+        rm -f ~/.local/bin/saml2aws
+        tar -xzvf ${FILE_NAME} -C ~/.local/bin
         chmod u+x ~/.local/bin/saml2aws
-        rm -f saml2aws_${CURRENT_VERSION}_linux_amd64.tar.gz
+        rm -f ${FILE_NAME}
       args:
-        creates: ~/.local/bin/saml2aws
         warn: no
 
     # vscode
