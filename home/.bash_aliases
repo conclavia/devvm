@@ -13,3 +13,8 @@ writecmd (){ perl -e 'ioctl STDOUT, 0x5412, $_ for split //, do{ chomp($_ = <>);
 fzh() {
   ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed -re 's/^\s*[0-9]+\s*//' | writecmd
 }
+
+# Import a local override file if it exists
+if [ -f "$HOME/.local_bash_aliases" ] ; then
+    . "$HOME/.local_bash_aliases"
+fi

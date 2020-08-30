@@ -29,3 +29,8 @@ export AWS_DEFAULT_REGION=ap-southeast-2
 
 # Configure fzf
 export FZF_DEFAULT_COMMAND='fdfind --type f --hidden --follow --exclude .git'
+
+# Import a local override file if it exists
+if [ -f "$HOME/.local_profile" ] ; then
+    . "$HOME/.local_profile"
+fi
