@@ -11,7 +11,7 @@
       shell: lsb_release -cs
       register: lsb_release_command
       changed_when: false
-    
+
     - name: Store OS version
       set_fact:
         lsb_release: "{{ lsb_release_command.stdout }}"
@@ -20,8 +20,8 @@
     - name: Install qgis apt key
       apt_key:
         keyserver: keyserver.ubuntu.com
-        id: 51F523511C7028C3
-    
+        id: F7E06F06199EF2F2
+
     - name: Add qgis apt repository
       apt_repository:
         repo: "deb https://qgis.org/ubuntu {{ lsb_release }} main"
@@ -29,9 +29,9 @@
         state: present
       notify:
         - Update apt cache
-    
+
     - meta: flush_handlers
-    
+
     - name: Install qgis
       apt:
         name:
