@@ -287,9 +287,44 @@
         state: latest
         extra_args: --user
 
+    # ripgrep
+    # TODO: remove when installation bug is fixed
+    #   See https://bugs.launchpad.net/ubuntu/+source/rust-bat/+bug/1868517
+    - name: Check latest ripgrep version
+      shell: curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | jq -r .tag_name | sed 's/^v//'
+      register: ripgrep_latest_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Check current ripgrep version
+      become: yes
+      become_user: "{{ username }}"
+      shell: rg --version | grep ripgrep | sed -E 's/ripgrep\s+//' | sed -E 's/\s+.*//' || true
+      register: ripgrep_current_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Install ripgrep
+      when: ripgrep_latest_version.stdout != ripgrep_current_version.stdout
+      shell: |
+        DOWNLOAD_URL=$( \
+          curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest \
+          | jq -r '.assets[].browser_download_url' \
+          | grep "ripgrep_.*_amd64.deb" \
+        )
+        FILE_NAME=$(basename ${DOWNLOAD_URL})
+
+        curl -O -L ${DOWNLOAD_URL}
+        apt -y install ./${FILE_NAME}
+        rm -f ${FILE_NAME}
+      args:
+        warn: no
+
     # saml2aws
     - name: Check latest saml2aws version
-      shell: curl -s https://api.github.com/repos/Versent/saml2aws/releases/latest | jq -r .tag_name | sed s/^v//
+      shell: curl -s https://api.github.com/repos/Versent/saml2aws/releases/latest | jq -r .tag_name | sed 's/^v//'
       register: saml2aws_latest_version
       args:
         warn: no
@@ -326,7 +361,7 @@
 
     # sqsmover
     - name: Check latest sqsmover version
-      shell: curl -s https://api.github.com/repos/mercury2269/sqsmover/releases/latest | jq -r .tag_name | sed s/^v//
+      shell: curl -s https://api.github.com/repos/mercury2269/sqsmover/releases/latest | jq -r .tag_name | sed 's/^v//'
       register: sqsmover_latest_version
       args:
         warn: no
