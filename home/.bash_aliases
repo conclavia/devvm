@@ -2,9 +2,16 @@ alias ans='ansible-playbook -K'
 alias cat='batcat'
 alias fd='fdfind'
 alias gc='git commit -m'
-alias gd="git diff -- ':!package-lock.json' ':!yarn.lock'"
+alias gd="git diff -- :!package-lock.json :!yarn.lock"
+alias gds="git diff --staged -- :!package-lock.json :!yarn.lock"
 alias gr='git pull --rebase && git rebase origin/master'
 alias upgrade='sudo apt update && sudo apt -y upgrade'
+
+# AWS
+alias cfn-ls="aws cloudformation list-stacks --query 'StackSummaries[?StackStatus!=\`DELETE_COMPLETE\`].[StackName]' --output text | sort"
+alias cfn-out="aws cloudformation describe-stacks --query 'Stacks[0].Outputs[*].[Description,OutputValue]' --output table --stack-name"
+alias sqs-len="aws sqs get-queue-attributes --attribute-names ApproximateNumberOfMessages ApproximateNumberOfMessagesNotVisible ApproximateNumberOfMessagesDelayed --queue-url"
+alias sqs-purge="aws sqs purge-queue --queue-url"
 
 # fzh - fuzzy search history
 # See https://github.com/junegunn/fzf/wiki/examples#command-history
