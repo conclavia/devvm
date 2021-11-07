@@ -84,6 +84,7 @@
         curl -fsSL https://starship.rs/install.sh | bash -s -- --yes
       args:
         creates: /usr/local/bin/starship
+        warn: no
 
     - name: Configure bash to use starship
       lineinfile:
