@@ -1,9 +1,6 @@
 - name: GIS development software
   hosts: 127.0.0.1
   connection: local
-  become: yes
-  vars:
-    username: "{{ lookup('env','USERNAME') }}"
 
   tasks:
     # os version

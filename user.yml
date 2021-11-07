@@ -1,0 +1,102 @@
+- name: User profile setup
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    username: "{{ lookup('env','USER') }}"
+
+  tasks:
+    # profile
+    - name: Configure local profile
+      copy:
+        src: home/
+        dest: ~/
+
+    - name: Disable screen lock
+      shell: "gsettings set org.gnome.desktop.screensaver lock-enabled false"
+
+    - name: Disable screensaver
+      shell: "gsettings set org.gnome.desktop.session idle-delay 0"
+
+    - name: Disable automatic suspend on battery power
+      shell: "gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'"
+
+    # aws cli tools
+    - name: Install AWS tooling
+      pip:
+        name:
+          - awscli-local
+          - awslogs
+          - cfn-flip
+          - cfn-lint
+        state: latest
+        extra_args: --user
+
+    # docker
+    - name: Install docker python package
+      pip:
+        name: docker
+        state: latest
+        extra_args: --user
+
+    - name: Add user to the docker group
+      become: yes
+      user:
+        name: "{{ username }}"
+        groups: docker
+        append: yes
+
+    # docker-compose
+    - name: Install docker compose
+      pip:
+        name: docker-compose
+        state: latest
+        extra_args: --user
+
+    # nodejs
+    - name: Install nvm
+      shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+      args:
+        creates: ~/.nvm/nvm.sh
+        warn: no
+
+    - name: Install node
+      shell: >
+        bash -c "source ~/.nvm/nvm.sh && nvm install --lts --latest-npm"
+      args:
+        creates: ~/.nvm/alias
+
+    - name: Install yarn
+      shell: >
+        bash -c "source ~/.nvm/nvm.sh && npm install --global yarn"
+
+    # python
+    - name: Install pipenv
+      pip:
+        name: pipenv
+        state: latest
+        extra_args: --user
+
+    # starship
+    - name: Install starship
+      shell: >
+        curl -fsSL https://starship.rs/install.sh | bash -s -- --yes
+      args:
+        creates: /usr/local/bin/starship
+
+    - name: Configure bash to use starship
+      lineinfile:
+        path: ~/.bashrc
+        line: eval "$(starship init bash)"
+
+    - name: Install FiraCode font (so starship glyphs will work)
+      shell: |
+        mkdir -p ~/.local/share/fonts
+        curl -O -L https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
+        unzip FiraCode.zip -d ~/.local/share/fonts
+        rm FiraCode.zip
+        fc-cache -fv
+      args:
+        creates: ~/.local/share/fonts/'Fira Code Regular Nerd Font Complete Mono.otf'
+        warn: no

@@ -15,11 +15,11 @@ Includes:
 * Python tooling (e.g. pipenv)
 * Visual Studio Code
 
-Currently tested and working on Ubuntu 20.04 LTS.
+Currently tested and working on Ubuntu 21.10.
 
 ## Instructions
 
-1. Create a new virtual machine (e.g. using VirtualBox) and install [Ubuntu 20.04 LTS Desktop](https://releases.ubuntu.com/20.04/).
+1. Create a new virtual machine (e.g. using VirtualBox) and install [Ubuntu 21.10 Desktop](https://releases.ubuntu.com/21.10/).
    * Select the **Minimal** installation type during setup.
    * Make sure you install any virtual machine tooling (e.g. VirtualBox Guest Additions).
 
@@ -34,8 +34,16 @@ sudo apt -y install git ansible
 git clone git@github.com:conclavia/devvm.git
 ```
 
-4. Run the ansible playbook
+4. Run the system playbook (for system-wide installs and config)
 ```
 cd devvm
-ansible-playbook -K devvm.yml
+sudo ansible-playbook system.yml
 ```
+
+5. Run the user playbook (for user-profile level installs and config)
+```
+cd devvm
+ansible-playbook -K user.yml
+```
+
+6. Set the font in your Ubuntu terminal to "FiraCode Nerd Font Mono" so the Starship glyphs will work

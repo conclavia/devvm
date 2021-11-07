@@ -1,0 +1,221 @@
+- name: Base Linux configuration
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # cpu architecture
+    - name: Get CPU architecture
+      shell: dpkg --print-architecture
+      register: dpkg_architecture_command
+      changed_when: false
+
+    - name: Store CPU architecture
+      set_fact:
+        dpkg_architecture: "{{ dpkg_architecture_command.stdout }}"
+
+    # os version
+    - name: Get OS version
+      shell: lsb_release -cs
+      register: lsb_release_command
+      changed_when: false
+
+    - name: Store OS version
+      set_fact:
+        lsb_release: "{{ lsb_release_command.stdout }}"
+
+    # base packages
+    - name: Install base packages
+      apt:
+        name:
+          - aptitude
+          - apt-file
+          - apt-transport-https
+          - bat
+          - build-essential
+          - ca-certificates
+          - cmake
+          - curl
+          - fd-find
+          - fzf
+          - git
+          - gnupg2
+          - httpie
+          - jq
+          - neovim
+          - netcat
+          - net-tools
+          - python
+          - python3-pip
+          - ripgrep
+          - software-properties-common
+          - tree
+          - unzip
+          - wget
+          - zip
+        state: latest
+        force: yes
+
+    # os config
+    - name: Set a hostname
+      hostname:
+        name: devvm
+
+    - name: Set timezone
+      timezone:
+        name: Australia/Sydney
+
+    - name: Allow 'sudo' group to have passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^%sudo"
+        line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        validate: visudo -cf %s
+
+    - name: Disable wayland
+      lineinfile:
+        path: /etc/gdm3/custom.conf
+        regexp: "^#?WaylandEnable="
+        line: "WaylandEnable=false"
+
+    - name: Set QT to X11
+      lineinfile:
+        path: /etc/environment
+        line: QT_QPA_PLATFORM=xcb
+
+    # aws cli
+    - name: Install aws cli
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        ./aws/install
+        rm -rf aws awscliv2.zip
+      args:
+        creates: /usr/local/bin/aws
+        warn: no
+
+    # chromium
+    - name: Install chromium
+      snap:
+        name: chromium
+
+    # docker
+    - name: Install docker apt key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+
+    - name: Add docker apt repository
+      apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }}] https://download.docker.com/linux/ubuntu {{ lsb_release }} stable"
+        filename: docker
+        state: present
+
+    - meta: flush_handlers
+
+    - name: Install docker
+      apt:
+        name: "docker-ce:{{ dpkg_architecture }}"
+        state: latest
+
+    # dotnet core
+    - name: Install microsoft apt key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add microsoft-ubuntu apt repository
+      apt_repository:
+        # TODO: Replace hirstute (21.04) with {{ lsb_release }} when Microsoft adds support for 21.10 (impish)
+        # repo: "deb [arch={{ dpkg_architecture }}] https://packages.microsoft.com/repos/microsoft-ubuntu-{{ lsb_release }}-prod {{ lsb_release }} main"
+        repo: "deb [arch={{ dpkg_architecture }}] https://packages.microsoft.com/repos/microsoft-ubuntu-hirsute-prod hirsute main"
+        filename: dotnetdev
+        state: present
+      notify:
+        - Update apt cache
+
+    - meta: flush_handlers
+
+    - name: Install dotnet-sdk-3.1
+      apt:
+        name: dotnet-sdk-3.1
+        state: latest
+
+    # elastic
+    - name: Configure mmap count for mmapfs to avoid out of memory issues
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^vm\.max_map_count='
+        line: vm.max_map_count=262144
+
+    # gh (GitHub cli)
+    - name: Check latest gh version
+      shell: curl -s https://api.github.com/repos/cli/cli/releases/latest | jq -r .html_url
+      register: gh_latest_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Check current gh version
+      shell: gh --version | grep /tag/ || true
+      register: gh_current_version
+      args:
+        warn: no
+      changed_when: false
+
+    - name: Install gh
+      when: gh_latest_version.stdout != gh_current_version.stdout
+      shell: |
+        DOWNLOAD_URL=$( \
+          curl -s https://api.github.com/repos/cli/cli/releases/latest \
+          | jq -r '.assets[].browser_download_url' \
+          | grep "gh_.*_linux_amd64\\.deb" \
+        )
+        FILE_NAME=$(basename ${DOWNLOAD_URL})
+
+        curl -O -L ${DOWNLOAD_URL}
+        apt install ./${FILE_NAME}
+        rm -rf ${FILE_NAME}
+      args:
+        warn: no
+
+    # jetbrains
+    - name: Install Jetbrains Rider
+      snap:
+        name: rider
+        classic: yes
+
+    - name: Install Pycharm Professional
+      snap:
+        name: pycharm-professional
+        classic: yes
+
+    - name: Install IntelliJ Idea Ultimate
+      snap:
+        name: intellij-idea-ultimate
+        classic: yes
+
+    - name: Install DataGrip
+      snap:
+        name: datagrip
+        classic: yes
+
+    # postman
+    - name: Install Postman
+      snap:
+        name: postman
+
+    # vscode
+    - name: Install vscode
+      snap:
+        name: code
+        classic: yes
+
+    # cleanup
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
+
+  # handlers
+  handlers:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
