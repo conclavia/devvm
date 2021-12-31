@@ -74,6 +74,10 @@
       shell: >
         bash -c "source ~/.nvm/nvm.sh && npm install --global yarn"
 
+    - name: Install npm-check-updates
+      shell: >
+        bash -c "source ~/.nvm/nvm.sh && npm install --global npm-check-updates"
+
     # python
     - name: Install pipenv
       pip:
