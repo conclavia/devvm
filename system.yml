@@ -209,6 +209,11 @@
         name: code
         classic: yes
 
+    # yq (YAML processor)
+    - name: Install yq
+      snap:
+        name: yq
+
     # cleanup
     - name: Remove dependencies that are no longer required
       apt:
