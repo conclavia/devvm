@@ -8,7 +8,7 @@ Includes:
 * Chromium web browser
 * Docker
 * Docker Compose
-* .NET Core
+* .NET
 * JetBrains IDEs
 * NodeJS (via NVM + Yarn)
 * Postman
@@ -19,7 +19,7 @@ Currently tested and working on Ubuntu 21.10.
 
 ## Instructions
 
-1. Create a new virtual machine (e.g. using VirtualBox) and install [Ubuntu 21.10 Desktop](https://releases.ubuntu.com/21.10/).
+1. Create a new virtual machine (e.g. using VirtualBox) and install [Ubuntu 22.04 Desktop](https://releases.ubuntu.com/22.04/).
    * Select the **Minimal** installation type during setup.
    * Make sure you install any virtual machine tooling (e.g. VirtualBox Guest Additions).
 
