@@ -3,16 +3,6 @@
   connection: local
 
   tasks:
-    # os version
-    - name: Get OS version
-      shell: lsb_release -cs
-      register: lsb_release_command
-      changed_when: false
-
-    - name: Store OS version
-      set_fact:
-        lsb_release: "{{ lsb_release_command.stdout }}"
-
     # qgis
     - name: Install qgis apt key
       apt_key:
@@ -21,13 +11,10 @@
 
     - name: Add qgis apt repository
       apt_repository:
-        repo: "deb https://qgis.org/ubuntu {{ lsb_release }} main"
+        repo: "deb https://qgis.org/ubuntu {{ ansible_facts['distribution_release'] }} main"
         filename: qgis
         state: present
-      notify:
-        - Update apt cache
-
-    - meta: flush_handlers
+        update_cache: yes
 
     - name: Install qgis
       apt:
@@ -58,9 +45,3 @@
     - name: Remove dependencies that are no longer required
       apt:
         autoremove: yes
-
-  # handlers
-  handlers:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
