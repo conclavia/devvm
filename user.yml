@@ -21,6 +21,9 @@
     - name: Remove trash icon from dock
       shell: "gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false"
 
+    - name: Remove home icon from desktop
+      shell: "gsettings set org.gnome.shell.extensions.ding show-home false"
+
     # aws cli tools
     - name: Install AWS tooling
       pip:
