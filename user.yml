@@ -105,3 +105,4 @@
       args:
         creates: ~/.local/share/fonts/'Fira Code Regular Nerd Font Complete Mono.otf'
         warn: no
+

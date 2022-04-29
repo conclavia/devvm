@@ -15,7 +15,7 @@ Includes:
 * Python tooling (e.g. pipenv)
 * Visual Studio Code
 
-Currently tested and working on Ubuntu 21.10.
+Currently tested and working on Ubuntu 22.04.
 
 ## Instructions
 
@@ -42,8 +42,8 @@ sudo ansible-playbook system.yml
 
 5. Run the user playbook (for user-profile level installs and config)
 ```
-cd devvm
-ansible-playbook -K user.yml
+ansible-playbook user.yml
 ```
 
 6. Set the font in your Ubuntu terminal to "FiraCode Nerd Font Mono" so the Starship glyphs will work
+
