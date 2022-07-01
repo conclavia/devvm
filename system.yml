@@ -135,9 +135,11 @@
         state: present
         update_cache: yes
 
-    - name: Install dotnet-sdk-6.0
+    - name: Install .NET tooling
       apt:
-        name: dotnet-sdk-6.0
+        name:
+          - dotnet-sdk-6.0
+          - powershell
         state: latest
 
     # elastic
