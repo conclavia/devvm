@@ -9,6 +9,12 @@
         src: home/
         dest: ~/
 
+    - name: Copy skeleton files
+      copy:
+        src: skel/
+        dest: ~/
+        force: no
+
     - name: Disable screen lock
       shell: "gsettings set org.gnome.desktop.screensaver lock-enabled false"
 
@@ -106,6 +112,5 @@
         rm FiraCode.zip
         fc-cache -fv
       args:
-        creates: ~/.local/share/fonts/'Fira Code Regular Nerd Font Complete Mono.otf'
+        creates: ~/.local/share/fonts/Fira Code Regular Nerd Font Complete Mono.otf
         warn: no
-
