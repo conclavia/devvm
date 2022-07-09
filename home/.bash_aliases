@@ -5,7 +5,7 @@ alias gc='git commit -m'
 alias gd="git diff -- :!package-lock.json :!yarn.lock"
 alias gds="git diff --staged -- :!package-lock.json :!yarn.lock"
 alias gr='git pull --rebase && git rebase origin/master'
-alias upgrade='sudo apt update && sudo apt -y upgrade'
+alias upgrade='sudo apt update && sudo apt -y upgrade && sudo snap refresh'
 
 # Wait for user confirmation
 confirm() {

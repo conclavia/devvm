@@ -114,3 +114,8 @@
       args:
         creates: ~/.local/share/fonts/Fira Code Regular Nerd Font Complete Mono.otf
         warn: no
+
+    - name: Configure terminal to use FiraCode Mono font
+      shell: |
+        TERMINAL_PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | sed "s/'//g")
+        dconf load /org/gnome/terminal/legacy/profiles:/:${TERMINAL_PROFILE}/ < files/terminal.profile
