@@ -77,6 +77,11 @@
         path: /etc/environment
         line: QT_QPA_PLATFORM=xcb
 
+    - name: Copy OS config files
+      ansible.builtin.copy:
+        src: files/etc/
+        dest: /etc/
+
     # aws cli
     - name: Install aws cli
       shell: |
