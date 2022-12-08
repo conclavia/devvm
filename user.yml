@@ -84,6 +84,14 @@
       shell: >
         bash -c "source ~/.nvm/nvm.sh && npm install --global npm-check-updates"
 
+    # pwsh
+    - name: Install pwsh modules
+      shell: |
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-Module posh-git, Terminal-Icons
+      args:
+        executable: /usr/bin/pwsh
+
     # python
     - name: Install pipenv
       pip:
@@ -91,20 +99,13 @@
         state: latest
         extra_args: --user
 
-    # starship
-    - name: Install starship
-      shell: >
-        curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
-      args:
-        creates: /usr/local/bin/starship
-        warn: no
-
-    - name: Configure bash to use starship
+    # shell prompt
+    - name: Configure bash to use oh-my-posh
       lineinfile:
         path: ~/.bashrc
-        line: eval "$(starship init bash)"
+        line: eval "$(oh-my-posh init bash --config ~/.poshthemes/devvm.omp.json)"
 
-    - name: Install FiraCode font (so starship glyphs will work)
+    - name: Install FiraCode font (so shell prompt glyphs will work)
       shell: |
         mkdir -p ~/.local/share/fonts
         curl -O -L https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
