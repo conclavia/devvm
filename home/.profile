@@ -25,9 +25,11 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$PATH:$HOME/.local/bin"
 fi
 
-# Add custom screen resolutions
-xrandr --newmode "3440x1440_60.00"  419.50  3440 3696 4064 4688  1440 1443 1453 1493 -hsync +vsync
-xrandr --addmode Virtual1 "3440x1440_60.00"
+if [[ ! $(grep WSL /proc/version) ]]; then
+  # Add custom screen resolutions
+  xrandr --newmode "3440x1440_60.00"  419.50  3440 3696 4064 4688  1440 1443 1453 1493 -hsync +vsync
+  xrandr --addmode Virtual1 "3440x1440_60.00"
+fi
 
 # set AWS defaults
 export AWS_DEFAULT_REGION=ap-southeast-2

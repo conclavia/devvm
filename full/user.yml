@@ -1,0 +1,52 @@
+- name: User profile setup
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # profile
+    - name: Disable screen lock
+      shell: "gsettings set org.gnome.desktop.screensaver lock-enabled false"
+
+    - name: Disable screensaver
+      shell: "gsettings set org.gnome.desktop.session idle-delay 0"
+
+    - name: Disable automatic suspend on battery power
+      shell: "gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'"
+
+    - name: Remove trash icon from dock
+      shell: "gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false"
+
+    - name: Remove home icon from desktop
+      shell: "gsettings set org.gnome.shell.extensions.ding show-home false"
+
+    # docker
+    - name: Add user to the docker group
+      become: yes
+      user:
+        name: "{{ ansible_facts['user_id'] }}"
+        groups: docker
+        append: yes
+
+    # git credential manager
+    - name: Configure path to gcm
+      ansible.builtin.lineinfile:
+        path: ~/.gitconfig
+        regexp: '^\s+helper\s*=\s+.*'
+        line: "    helper = /usr/local/share/gcm-core/git-credential-manager-core"
+
+    # shell prompt
+    - name: Install FiraCode font (so shell prompt glyphs will work)
+      shell: |
+        mkdir -p ~/.local/share/fonts
+        curl -O -L https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
+        unzip FiraCode.zip -d ~/.local/share/fonts
+        rm FiraCode.zip
+        fc-cache -fv
+      args:
+        creates: ~/.local/share/fonts/Fira Code Regular Nerd Font Complete Mono.otf
+        warn: no
+
+    - name: Configure terminal to use FiraCode Mono font
+      shell: |
+        TERMINAL_PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | sed "s/'//g")
+        dconf load /org/gnome/terminal/legacy/profiles:/:${TERMINAL_PROFILE}/ < files/terminal.profile

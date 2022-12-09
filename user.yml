@@ -15,21 +15,6 @@
         dest: ~/
         force: no
 
-    - name: Disable screen lock
-      shell: "gsettings set org.gnome.desktop.screensaver lock-enabled false"
-
-    - name: Disable screensaver
-      shell: "gsettings set org.gnome.desktop.session idle-delay 0"
-
-    - name: Disable automatic suspend on battery power
-      shell: "gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'"
-
-    - name: Remove trash icon from dock
-      shell: "gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false"
-
-    - name: Remove home icon from desktop
-      shell: "gsettings set org.gnome.shell.extensions.ding show-home false"
-
     # aws cli tools
     - name: Install AWS tooling
       pip:
@@ -48,13 +33,6 @@
         state: latest
         extra_args: --user
 
-    - name: Add user to the docker group
-      become: yes
-      user:
-        name: "{{ ansible_facts['user_id'] }}"
-        groups: docker
-        append: yes
-
     # docker-compose
     - name: Install docker compose
       pip:
@@ -65,7 +43,7 @@
     # nodejs
     - name: Install nvm
       shell: >
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
       args:
         creates: ~/.nvm/nvm.sh
         warn: no
@@ -104,19 +82,3 @@
       lineinfile:
         path: ~/.bashrc
         line: eval "$(oh-my-posh init bash --config ~/.poshthemes/devvm.omp.json)"
-
-    - name: Install FiraCode font (so shell prompt glyphs will work)
-      shell: |
-        mkdir -p ~/.local/share/fonts
-        curl -O -L https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
-        unzip FiraCode.zip -d ~/.local/share/fonts
-        rm FiraCode.zip
-        fc-cache -fv
-      args:
-        creates: ~/.local/share/fonts/Fira Code Regular Nerd Font Complete Mono.otf
-        warn: no
-
-    - name: Configure terminal to use FiraCode Mono font
-      shell: |
-        TERMINAL_PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | sed "s/'//g")
-        dconf load /org/gnome/terminal/legacy/profiles:/:${TERMINAL_PROFILE}/ < files/terminal.profile

@@ -3,7 +3,6 @@
   connection: local
 
   vars:
-    docker_gpg_key_path: /usr/share/keyrings/docker-archive-keyring.gpg
     microsoft_gpg_key_path: /usr/share/keyrings/microsoft-archive-keyring.gpg
 
   tasks:
@@ -49,34 +48,6 @@
         force: yes
         update_cache: yes
 
-    # os config
-    - name: Set a hostname
-      hostname:
-        name: devvm
-
-    - name: Set timezone
-      timezone:
-        name: Australia/Sydney
-
-    - name: Allow 'sudo' group to have passwordless sudo
-      lineinfile:
-        path: /etc/sudoers
-        state: present
-        regexp: "^%sudo"
-        line: "%sudo ALL=(ALL) NOPASSWD: ALL"
-        validate: visudo -cf %s
-
-    - name: Disable wayland
-      lineinfile:
-        path: /etc/gdm3/custom.conf
-        regexp: "^#?WaylandEnable="
-        line: "WaylandEnable=false"
-
-    - name: Set QT to X11
-      lineinfile:
-        path: /etc/environment
-        line: QT_QPA_PLATFORM=xcb
-
     - name: Copy OS config files
       ansible.builtin.copy:
         src: files/etc/
@@ -92,34 +63,6 @@
       args:
         creates: /usr/local/bin/aws
         warn: no
-
-    # chromium
-    - name: Install chromium
-      snap:
-        name: chromium
-
-    # docker
-    - name: Download docker apt key
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: "{{ docker_gpg_key_path }}.key"
-
-    - name: Unarmour docker apt key
-      ansible.builtin.shell: |
-        cat {{ docker_gpg_key_path }}.key | gpg --dearmor > {{ docker_gpg_key_path }}
-      args:
-        creates: "{{ docker_gpg_key_path }}"
-
-    - name: Add docker apt repository
-      apt_repository:
-        repo: "deb [arch={{ dpkg_architecture }} signed-by={{ docker_gpg_key_path }}] https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable"
-        filename: docker
-        state: present
-
-    - name: Install docker
-      apt:
-        name: "docker-ce:{{ dpkg_architecture }}"
-        state: latest
 
     # dotnet core
     - name: Download microsoft apt key
@@ -146,44 +89,6 @@
           - dotnet-sdk-6.0
           - powershell
         state: latest
-
-    # elastic
-    - name: Configure mmap count for mmapfs to avoid out of memory issues
-      ansible.builtin.lineinfile:
-        path: /etc/sysctl.conf
-        regexp: '^vm\.max_map_count='
-        line: vm.max_map_count=262144
-
-    # git credential manager
-    - name: Check latest gcm version
-      shell: curl -s https://api.github.com/repos/GitCredentialManager/git-credential-manager/releases/latest | jq -r .tag_name | sed s/v//
-      register: gcm_latest_version
-      args:
-        warn: no
-      changed_when: false
-
-    - name: Check current gcm version
-      shell: git-credential-manager-core --version | sed 's/\+.*//' || true
-      register: gcm_current_version
-      args:
-        warn: no
-      changed_when: false
-
-    - name: Install gcm
-      when: gcm_latest_version.stdout != gcm_current_version.stdout
-      shell: |
-        DOWNLOAD_URL=$( \
-          curl -s https://api.github.com/repos/GitCredentialManager/git-credential-manager/releases/latest \
-          | jq -r '.assets[].browser_download_url' \
-          | grep "gcm-linux_amd64.*\\.deb" \
-        )
-        FILE_NAME=$(basename ${DOWNLOAD_URL})
-
-        curl -O -L ${DOWNLOAD_URL}
-        apt install ./${FILE_NAME}
-        rm -rf ${FILE_NAME}
-      args:
-        warn: no
 
     # gh (GitHub cli)
     - name: Check latest gh version
@@ -216,49 +121,12 @@
       args:
         warn: no
 
-    # jetbrains
-    - name: Install Jetbrains Rider
-      snap:
-        name: rider
-        classic: yes
-
-    - name: Install Pycharm Professional
-      snap:
-        name: pycharm-professional
-        classic: yes
-
-    - name: Install IntelliJ Idea Ultimate
-      snap:
-        name: intellij-idea-ultimate
-        classic: yes
-
-    - name: Install DataGrip
-      snap:
-        name: datagrip
-        classic: yes
-
-    # postman
-    - name: Install Postman
-      snap:
-        name: postman
-
-    # pwsh
+    # oh-my-posh
     - name: Install oh-my-posh
       ansible.builtin.get_url:
         url: https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64
         dest: /usr/local/bin/oh-my-posh
         mode: "0755"
-
-    # vscode
-    - name: Install vscode
-      snap:
-        name: code
-        classic: yes
-
-    # yq (YAML processor)
-    - name: Install yq
-      snap:
-        name: yq
 
     # cleanup
     - name: Remove dependencies that are no longer required
