@@ -87,6 +87,7 @@
       apt:
         name:
           - dotnet-sdk-6.0
+          - dotnet-sdk-7.0
           - powershell
         state: latest
 
