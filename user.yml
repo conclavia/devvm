@@ -66,7 +66,7 @@
     - name: Install pwsh modules
       shell: |
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        Install-Module posh-git, Terminal-Icons
+        Install-Module Join-Object, Terminal-Icons
       args:
         executable: /usr/bin/pwsh
 
