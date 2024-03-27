@@ -27,13 +27,6 @@
         groups: docker
         append: yes
 
-    # git credential manager
-    - name: Configure path to gcm
-      ansible.builtin.lineinfile:
-        path: ~/.gitconfig
-        regexp: '^\s+helper\s*=\s+.*'
-        line: "    helper = /usr/local/share/gcm-core/git-credential-manager-core"
-
     # shell prompt
     - name: Install FiraCode font (so shell prompt glyphs will work)
       shell: |
@@ -49,4 +42,4 @@
     - name: Configure terminal to use FiraCode Mono font
       shell: |
         TERMINAL_PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | sed "s/'//g")
-        dconf load /org/gnome/terminal/legacy/profiles:/:${TERMINAL_PROFILE}/ < files/terminal.profile
+        dconf load /org/gnome/terminal/legacy/profiles:/:${TERMINAL_PROFILE}/ < ../files/terminal.profile
