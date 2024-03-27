@@ -40,7 +40,7 @@ sudo apt -y install git ansible
 3. Clone the devvm repository.
 
 ```
-git clone git@github.com:conclavia/devvm.git
+git clone https://github.com/conclavia/devvm.git
 ```
 
 4. Run the system playbook (for system-wide installs and config)
@@ -56,12 +56,11 @@ sudo ansible-playbook system.yml
 ansible-playbook user.yml
 ```
 
-6. For a full VM setup, repeat steps 4-5 under the `full` directory.
+6. For a full VM setup, repeat steps 4-5 using the playbooks under the `full` directory.
 
 ```
-cd full
-sudo ansible-playbook system.yml
-ansible-playbook user.yml
+sudo ansible-playbook full/system.yml
+ansible-playbook full/user.yml
 ```
 
-7. Make sure your terminal of choice is configured to an appropriate [nerd font](https://github.com/ryanoasis/nerd-fonts) so the oh-my-posh glyphs will work
+7. Reboot to complete the setup
