@@ -17,36 +17,21 @@
 
     # aws cli tools
     - name: Install AWS tooling
-      pip:
-        name:
-          - awscli-local
-          - awslogs
-          - cfn-flip
-          - cfn-lint
+      community.general.pipx:
+        name: "{{ item }}"
         state: latest
-        extra_args: --user
-
-    # docker
-    - name: Install docker python package
-      pip:
-        name: docker
-        state: latest
-        extra_args: --user
-
-    # docker-compose
-    - name: Install docker compose
-      pip:
-        name: docker-compose
-        state: latest
-        extra_args: --user
+      loop:
+        - awscli-local
+        - awslogs
+        - cfn-flip
+        - cfn-lint
 
     # nodejs
     - name: Install nvm
       shell: >
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
       args:
         creates: ~/.nvm/nvm.sh
-        warn: no
 
     - name: Install node
       shell: >
@@ -72,10 +57,9 @@
 
     # python
     - name: Install pipenv
-      pip:
+      community.general.pipx:
         name: pipenv
         state: latest
-        extra_args: --user
 
     # shell prompt
     - name: Configure bash to use oh-my-posh

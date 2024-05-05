@@ -35,8 +35,9 @@
           - httpie
           - jq
           - neovim
-          - netcat
+          - ncat
           - net-tools
+          - pipx
           - python3-pip
           - ripgrep
           - software-properties-common
@@ -62,7 +63,6 @@
         rm -rf aws awscliv2.zip
       args:
         creates: /usr/local/bin/aws
-        warn: no
 
     # dotnet core
     - name: Download microsoft apt key
@@ -86,24 +86,18 @@
     - name: Install .NET tooling
       apt:
         name:
-          - dotnet-sdk-6.0
-          - dotnet-sdk-7.0
-          - powershell
+          - dotnet-sdk-8.0
         state: latest
 
     # gh (GitHub cli)
     - name: Check latest gh version
       shell: curl -s https://api.github.com/repos/cli/cli/releases/latest | jq -r .html_url
       register: gh_latest_version
-      args:
-        warn: no
       changed_when: false
 
     - name: Check current gh version
       shell: gh --version | grep /tag/ || true
       register: gh_current_version
-      args:
-        warn: no
       changed_when: false
 
     - name: Install gh
@@ -119,8 +113,6 @@
         curl -O -L ${DOWNLOAD_URL}
         apt install ./${FILE_NAME}
         rm -rf ${FILE_NAME}
-      args:
-        warn: no
 
     # oh-my-posh
     - name: Install oh-my-posh

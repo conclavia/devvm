@@ -69,46 +69,38 @@
 
     - name: Install docker
       apt:
-        name: "docker-ce:{{ dpkg_architecture }}"
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
         state: latest
 
-    # elastic
-    - name: Configure mmap count for mmapfs to avoid out of memory issues
-      ansible.builtin.lineinfile:
-        path: /etc/sysctl.conf
-        regexp: '^vm\.max_map_count='
-        line: vm.max_map_count=262144
-
-    # git credential manager
+    # git-credential-manager
     - name: Check latest gcm version
-      shell: curl -s https://api.github.com/repos/GitCredentialManager/git-credential-manager/releases/latest | jq -r .tag_name | sed s/v//
+      shell: curl -s https://api.github.com/repos/git-ecosystem/git-credential-manager/releases/latest | jq -r .tag_name | sed 's/^v//'
       register: gcm_latest_version
-      args:
-        warn: no
       changed_when: false
 
     - name: Check current gcm version
-      shell: git-credential-manager-core --version | sed 's/\+.*//' || true
+      shell: git-credential-manager --version | sed 's/\+.*//' || true
       register: gcm_current_version
-      args:
-        warn: no
       changed_when: false
 
     - name: Install gcm
       when: gcm_latest_version.stdout != gcm_current_version.stdout
       shell: |
         DOWNLOAD_URL=$( \
-          curl -s https://api.github.com/repos/GitCredentialManager/git-credential-manager/releases/latest \
+          curl -s curl -s https://api.github.com/repos/git-ecosystem/git-credential-manager/releases/latest \
           | jq -r '.assets[].browser_download_url' \
-          | grep "gcm-linux_amd64.*\\.deb" \
+          | grep "gcm-linux_amd64\\..*\\.deb" \
         )
         FILE_NAME=$(basename ${DOWNLOAD_URL})
 
         curl -O -L ${DOWNLOAD_URL}
         apt install ./${FILE_NAME}
         rm -rf ${FILE_NAME}
-      args:
-        warn: no
 
     # jetbrains
     - name: Install Jetbrains Rider
@@ -142,7 +134,3 @@
         name: code
         classic: yes
 
-    # yq (YAML processor)
-    - name: Install yq
-      snap:
-        name: yq
