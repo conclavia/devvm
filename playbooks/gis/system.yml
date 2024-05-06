@@ -1,0 +1,29 @@
+- name: GIS - System
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    qgis_gpg_key_path: /usr/share/keyrings/qgis-archive-keyring.gpg
+
+  tasks:
+    - name: Download QGIS apt key
+      ansible.builtin.get_url:
+        url: https://download.qgis.org/downloads/qgis-archive-keyring.gpg
+        dest: "{{ qgis_gpg_key_path }}"
+
+    - name: Add QGIS apt repository
+      when: is_desktop | bool
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by={{ qgis_gpg_key_path }}] https://qgis.org/ubuntu {{ ansible_facts['distribution_release'] }} main"
+        filename: qgis
+        state: present
+        update_cache: yes
+
+    - name: Install GIS tools
+      when: is_desktop | bool
+      ansible.builtin.apt:
+        name:
+          - qgis
+          - qgis-plugin-grass
+          - qmapshack
+        state: latest

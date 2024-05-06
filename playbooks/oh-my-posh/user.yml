@@ -1,0 +1,41 @@
+- name: Oh My Posh - User
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # terminal font
+    - name: Install FiraCode font (so shell prompt glyphs will work)
+      when: is_desktop | bool
+      ansible.builtin.shell: |
+        DOWNLOAD_URL=$( \
+          curl -s https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest \
+          | jq -r '.assets[].browser_download_url' \
+          | grep 'FiraCode.zip$' \
+        )
+        FILE_NAME=$(basename ${DOWNLOAD_URL})
+
+        curl -O -L ${DOWNLOAD_URL}
+        
+        unzip ${FILE_NAME} -d ~/.local/share/fonts
+        rm ${FILE_NAME}
+        fc-cache -fv
+      args:
+        creates: ~/.local/share/fonts/Fira Code Regular Nerd Font Complete Mono.otf
+
+    - name: Configure terminal to use FiraCode Mono font
+      when: is_desktop | bool
+      ansible.builtin.shell: |
+        TERMINAL_PROFILE=$(gsettings get org.gnome.Terminal.ProfilesList default | sed "s/'//g")
+        dconf load /org/gnome/terminal/legacy/profiles:/:${TERMINAL_PROFILE}/ < terminal.profile
+
+    # theme
+    - name: Copy files
+      ansible.builtin.copy:
+        src: home/
+        dest: ~/
+    
+    # bash
+    - name: Configure bash to use oh-my-posh
+      ansible.builtin.lineinfile:
+        path: ~/.bashrc
+        line: eval "$(oh-my-posh init bash --config ~/.poshthemes/devvm.omp.json)"

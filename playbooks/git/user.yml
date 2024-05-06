@@ -1,0 +1,25 @@
+- name: Git - User
+  hosts: 127.0.0.1
+  connection: local
+
+  vars_prompt:
+    - name: git_user_name
+      prompt: Git user name
+    - name: git_user_email
+      prompt: Git user email
+
+  tasks:
+    - name: Git Credential Manager path (WSL)
+      when: is_wsl | bool
+      ansible.builtin.set_fact:
+        git_credential_manager_path: /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager-core.exe
+
+    - name: Git Credential Manager path (desktop)
+      when: is_desktop | bool
+      ansible.builtin.set_fact:
+        git_credential_manager_path: /usr/local/bin/git-credential-manager
+    
+    - name: Copy .gitconfig
+      ansible.builtin.template:
+        src: home/.gitconfig.jinja
+        dest: ~/.gitconfig

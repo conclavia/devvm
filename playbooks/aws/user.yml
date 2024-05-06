@@ -1,0 +1,15 @@
+- name: AWS - User
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # aws cli tools
+    - name: Install AWS tooling
+      community.general.pipx:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - awscli-local
+        - awslogs
+        - cfn-flip
+        - cfn-lint

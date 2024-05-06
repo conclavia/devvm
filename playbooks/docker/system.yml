@@ -1,0 +1,45 @@
+- name: Docker - System
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    docker_gpg_key_path: /usr/share/keyrings/docker-archive-keyring.gpg
+
+  tasks:
+    # cpu architecture
+    - name: Get CPU architecture
+      ansible.builtin.shell: dpkg --print-architecture
+      register: dpkg_architecture_command
+      changed_when: false
+
+    - name: Store CPU architecture
+      ansible.builtin.set_fact:
+        dpkg_architecture: "{{ dpkg_architecture_command.stdout }}"
+
+    # docker
+    - name: Download docker apt key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: "{{ docker_gpg_key_path }}.key"
+
+    - name: Unarmour docker apt key
+      ansible.builtin.shell: |
+        cat {{ docker_gpg_key_path }}.key | gpg --dearmor > {{ docker_gpg_key_path }}
+      args:
+        creates: "{{ docker_gpg_key_path }}"
+
+    - name: Add docker apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }} signed-by={{ docker_gpg_key_path }}] https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable"
+        filename: docker
+        state: present
+
+    - name: Install docker
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest

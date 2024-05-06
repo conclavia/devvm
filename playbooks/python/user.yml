@@ -1,0 +1,9 @@
+- name: Python - User
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Install pipenv
+      community.general.pipx:
+        name: pipenv
+        state: latest

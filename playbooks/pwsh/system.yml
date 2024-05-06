@@ -1,0 +1,47 @@
+- name: PowerShell - System
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    microsoft_gpg_key_path: /usr/share/keyrings/microsoft-archive-keyring.gpg
+
+  tasks:
+    # cpu architecture
+    - name: Get CPU architecture
+      ansible.builtin.shell: dpkg --print-architecture
+      register: dpkg_architecture_command
+      changed_when: false
+
+    - name: Store CPU architecture
+      ansible.builtin.set_fact:
+        dpkg_architecture: "{{ dpkg_architecture_command.stdout }}"
+
+    - name: Copy files
+      ansible.builtin.copy:
+        src: etc/
+        dest: /etc/
+
+    # microsoft apt repository
+    - name: Download microsoft apt key
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        dest: "{{ microsoft_gpg_key_path }}.key"
+
+    - name: Unarmour microsoft apt key
+      ansible.builtin.shell: |
+        cat {{ microsoft_gpg_key_path }}.key | gpg --dearmor > {{ microsoft_gpg_key_path }}
+      args:
+        creates: "{{ microsoft_gpg_key_path }}"
+
+    - name: Add microsoft apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_gpg_key_path }}] https://packages.microsoft.com/repos/microsoft-ubuntu-{{ ansible_facts['distribution_release'] }}-prod {{ ansible_facts['distribution_release'] }} main"
+        filename: microsoft
+        state: present
+        update_cache: yes
+
+    # pwsh
+    - name: Install pwsh
+      ansible.builtin.apt:
+        name: powershell
+        state: latest

@@ -1,0 +1,23 @@
+- name: .NET - System
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # dotnet core
+    - name: Install .NET tooling
+      ansible.builtin.apt:
+        name:
+          - dotnet-sdk-8.0
+        state: latest
+
+    # jetbrains
+    - name: Install Jetbrains Rider
+      when: is_desktop | bool
+      community.general.snap:
+        name: rider
+        classic: yes
+
+    - name: Install DataGrip
+      community.general.snap:
+        name: datagrip
+        classic: yes

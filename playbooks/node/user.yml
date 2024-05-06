@@ -1,0 +1,28 @@
+- name: Node JS - User
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Install nvm
+      ansible.builtin.shell: |
+        NVM_VERSION=$( \
+          curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest \
+          | jq -r '.tag_name'
+        )
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash
+      args:
+        creates: ~/.nvm/nvm.sh
+
+    - name: Install node
+      ansible.builtin.shell: |
+        bash -c "source ~/.nvm/nvm.sh && nvm install --lts --latest-npm"
+      args:
+        creates: ~/.nvm/alias
+
+    - name: Install yarn
+      ansible.builtin.shell: |
+        bash -c "source ~/.nvm/nvm.sh && npm install --global yarn"
+
+    - name: Install npm-check-updates
+      ansible.builtin.shell: |
+        bash -c "source ~/.nvm/nvm.sh && npm install --global npm-check-updates"

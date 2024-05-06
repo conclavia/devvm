@@ -1,0 +1,14 @@
+- name: AWS - System
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # aws cli
+    - name: Install aws cli
+      ansible.builtin.shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        ./aws/install
+        rm -rf aws awscliv2.zip
+      args:
+        creates: /usr/local/bin/aws

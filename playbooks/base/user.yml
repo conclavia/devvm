@@ -1,0 +1,29 @@
+- name: User profile setup
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Configure local profile
+      ansible.builtin.copy:
+        src: home/
+        dest: ~/
+
+    - name: Disable screen lock
+      when: is_desktop | bool
+      ansible.builtin.shell: "gsettings set org.gnome.desktop.screensaver lock-enabled false"
+
+    - name: Disable screensaver
+      when: is_desktop | bool
+      ansible.builtin.shell: "gsettings set org.gnome.desktop.session idle-delay 0"
+
+    - name: Disable automatic suspend on battery power
+      when: is_desktop | bool
+      ansible.builtin.shell: "gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'"
+
+    - name: Remove trash icon from dock
+      when: is_desktop | bool
+      ansible.builtin.shell: "gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false"
+
+    - name: Remove home icon from desktop
+      when: is_desktop | bool
+      ansible.builtin.shell: "gsettings set org.gnome.shell.extensions.ding show-home false"

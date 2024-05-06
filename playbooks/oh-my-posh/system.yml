@@ -1,0 +1,11 @@
+- name: Oh My Posh - System
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    # oh-my-posh
+    - name: Install oh-my-posh
+      ansible.builtin.get_url:
+        url: https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64
+        dest: /usr/local/bin/oh-my-posh
+        mode: "0755"

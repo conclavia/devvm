@@ -1,0 +1,28 @@
+- name: GitHub CLI - System
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Check latest gh version
+      ansible.builtin.shell: curl -s https://api.github.com/repos/cli/cli/releases/latest | jq -r .html_url
+      register: gh_latest_version
+      changed_when: false
+
+    - name: Check current gh version
+      ansible.builtin.shell: gh --version | grep /tag/ || true
+      register: gh_current_version
+      changed_when: false
+
+    - name: Install gh
+      when: gh_latest_version.stdout != gh_current_version.stdout
+      ansible.builtin.shell: |
+        DOWNLOAD_URL=$( \
+          curl -s https://api.github.com/repos/cli/cli/releases/latest \
+          | jq -r '.assets[].browser_download_url' \
+          | grep "gh_.*_linux_amd64\\.deb" \
+        )
+        FILE_NAME=$(basename ${DOWNLOAD_URL})
+
+        curl -O -L ${DOWNLOAD_URL}
+        apt install ./${FILE_NAME}
+        rm -rf ${FILE_NAME}

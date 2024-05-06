@@ -10,17 +10,6 @@ using namespace System.Management.Automation.Language
 #     Tricks & tips learned from many others as well
 # ==================================================
 
-# ==================================================
-#   Shell prompt
-# ==================================================
-
-# Setup shell prompt
-if (-not $OhMyPoshConfig) {
-  $OhMyPoshConfig = "~/.poshthemes/devvm.omp.json"
-}
-oh-my-posh init pwsh --config $OhMyPoshConfig | Invoke-Expression
-Import-Module Terminal-Icons
-
 # Sometimes you want to get a property of invoke a member on what you've entered so far
 # but you need parens to do that.  This binding will help by putting parens around the current selection,
 # or if nothing is selected, the whole line.
@@ -303,22 +292,4 @@ Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
   winget complete --word="$Local:word" --commandline "$Local:ast" --position $cursorPosition | ForEach-Object {
     [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
   }
-}
-
-
-# ==================================================
-#   Profile
-# ==================================================
-
-$PSProfile = $PROFILE.CurrentUserAllHosts
-function Open-PwshProfile {
-  code $PSProfile
-}
-Set-Alias profile Open-PwshProfile
-
-
-# Import a local override file if it exists
-$LocalProfileOverride = "$PSScriptRoot/local_profile.ps1"
-if (Test-Path $LocalProfileOverride -PathType Leaf) {
-  . $LocalProfileOverride
 }

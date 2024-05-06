@@ -1,0 +1,93 @@
+- name: Base OS - System
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Install base packages
+      ansible.builtin.apt:
+        name:
+          - aptitude
+          - apt-file
+          - apt-transport-https
+          - bat
+          - build-essential
+          - ca-certificates
+          - cmake
+          - curl
+          - fd-find
+          - fzf
+          - git
+          - gnupg2
+          - httpie
+          - jq
+          - neovim
+          - ncat
+          - net-tools
+          - pipx
+          - python3-pip
+          - ripgrep
+          - software-properties-common
+          - tree
+          - unzip
+          - wget
+          - zip
+        state: latest
+        force: yes
+        update_cache: yes
+
+    # os config
+    - name: Set a hostname
+      when: is_desktop | bool
+      ansible.builtin.hostname:
+        name: devvm
+
+    - name: Set timezone
+      when: is_desktop | bool
+      community.general.timezone:
+        name: Australia/Sydney
+
+    - name: Allow 'sudo' group to have passwordless sudo
+      when: is_desktop | bool
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^%sudo"
+        line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        validate: visudo -cf %s
+
+    - name: Disable wayland
+      when: is_desktop | bool
+      ansible.builtin.lineinfile:
+        path: /etc/gdm3/custom.conf
+        regexp: "^#?WaylandEnable="
+        line: "WaylandEnable=false"
+
+    - name: Set QT to X11
+      when: is_desktop | bool
+      ansible.builtin.lineinfile:
+        path: /etc/environment
+        line: QT_QPA_PLATFORM=xcb
+
+    # chromium
+    - name: Install chromium
+      when: is_desktop | bool
+      community.general.snap:
+        name: chromium
+
+    # postman
+    - name: Install Postman
+      when: is_desktop | bool
+      community.general.snap:
+        name: postman
+
+    # vscode
+    - name: Install vscode
+      when: is_desktop | bool
+      community.general.snap:
+        name: code
+        classic: yes
+
+    # cleanup
+    - name: Remove dependencies that are no longer required
+      ansible.builtin.apt:
+        autoremove: yes

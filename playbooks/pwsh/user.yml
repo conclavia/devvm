@@ -1,0 +1,16 @@
+- name: PowerShell - User
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Install pwsh modules
+      ansible.builtin.shell: |
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-Module Join-Object, Terminal-Icons
+      args:
+        executable: /usr/bin/pwsh
+
+    - name: Copy files
+      ansible.builtin.copy:
+        src: home/
+        dest: ~/

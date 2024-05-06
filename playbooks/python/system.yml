@@ -1,0 +1,10 @@
+
+- name: Python - System
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Install Pycharm Professional
+      community.general.snap:
+        name: pycharm-professional
+        classic: yes
