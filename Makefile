@@ -55,6 +55,19 @@ help-generate:
 init: ## Initialise local environment for running playbooks
 	sudo apt update
 	sudo apt -y install ansible
+	@$(MAKE) ansible-galaxy-update-collections
+
+ansible-galaxy-update-collections:
+	$(eval ANSIBLE_GALAXY_COMMUNITY_GENERAL_MAJOR_VERSION := $(shell \
+		ansible-galaxy collection list community.general \
+		| grep '^community.general' \
+		| sort \
+		| tail -1 \
+		| cut -d ' ' -f 2 \
+		| cut -d '.' -f 1 \
+	))
+
+	@[[ "$(ANSIBLE_GALAXY_COMMUNITY_GENERAL_MAJOR_VERSION)" == "1" ]] && ansible-galaxy collection install -f community.general || exit 0
 
 resolve-environment: # Check whether we are running on WSL or Ubuntu Desktop
 	$(eval IS_WSL=$(if $(IS_WSL),1,$(if $(WSL_DISTRO_NAME),1,)))

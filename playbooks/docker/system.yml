@@ -18,23 +18,27 @@
 
     # docker
     - name: Download docker apt key
+      when: is_desktop | bool
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: "{{ docker_gpg_key_path }}.key"
 
     - name: Unarmour docker apt key
+      when: is_desktop | bool
       ansible.builtin.shell: |
         cat {{ docker_gpg_key_path }}.key | gpg --dearmor > {{ docker_gpg_key_path }}
       args:
         creates: "{{ docker_gpg_key_path }}"
 
     - name: Add docker apt repository
+      when: is_desktop | bool
       ansible.builtin.apt_repository:
         repo: "deb [arch={{ dpkg_architecture }} signed-by={{ docker_gpg_key_path }}] https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable"
         filename: docker
         state: present
 
     - name: Install docker
+      when: is_desktop | bool
       ansible.builtin.apt:
         name:
           - docker-ce

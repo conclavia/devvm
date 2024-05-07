@@ -8,7 +8,7 @@
 
 $PSProfile = $PROFILE.CurrentUserAllHosts
 function Open-PwshProfile {
-  code $PSProfile
+  code (Split-Path $PSProfile)
 }
 Set-Alias profile Open-PwshProfile
 

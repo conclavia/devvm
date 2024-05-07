@@ -1,4 +1,4 @@
-if (-not (Get-Variable OhMyPoshConfig)) {
+if (-not (Get-Variable OhMyPoshConfig -ErrorAction SilentlyContinue)) {
   $OhMyPoshConfig = "~/.poshthemes/devvm.omp.json"
 }
 

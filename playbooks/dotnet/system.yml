@@ -18,6 +18,7 @@
         classic: yes
 
     - name: Install DataGrip
+      when: is_desktop | bool
       community.general.snap:
         name: datagrip
         classic: yes
