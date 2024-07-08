@@ -96,7 +96,7 @@ playbook-%: # Run system and user playbooks for a specific helper
 #                High-level targets              #
 ##################################################
 
-dev: init base aws docker dotnet gh git node oh-my-posh python ## Set up a full development environment
+dev: init base aws docker dotnet gh git hashicorp node oh-my-posh python ## Set up a full development environment
 
 ##################################################
 #                Individual workloads            #
@@ -115,6 +115,8 @@ gh: playbook-gh ## Install GitHub CLI (gh)
 gis: playbook-gis ## Install GIS tools
 
 git: playbook-git ## Configure Git CLI
+
+hashicorp: playbook-hashicorp ## Configure HashiCorp tooling (packer, terraform)
 
 node: playbook-node ## Install Node JS development tools
 
